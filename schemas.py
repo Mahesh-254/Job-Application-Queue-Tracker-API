@@ -8,6 +8,12 @@ class ApplicationCreate(BaseModel):
     role_title: str
     status: Optional[str] = "Submitted"
 
+class ApplicationUpdate(BaseModel):
+    client_name: Optional[str] = None
+    company_name: Optional[str] = None
+    role_title: Optional[str] = None
+    status: Optional[str] = None
+
 class ApplicationResponse(ApplicationCreate):
     id: int
     applied_at: datetime
