@@ -11,10 +11,25 @@ app = FastAPI(title="Job Application & Queue Tracker API")
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "day": 5, "database": "connected"}
+    return {"status": "ok", "day": 6, "database": "connected"}
 
 @app.post("/applications", response_model=schemas.ApplicationResponse, status_code=201)
 def create_application(application: schemas.ApplicationCreate, db: Session = Depends(get_db)):
+    existing = (
+        db.query(models.Application)
+        .filter(
+            func.lower(models.Application.client_name) == application.client_name.lower(),
+            func.lower(models.Application.company_name) == application.company_name.lower(),
+            func.lower(models.Application.role_title) == application.role_title.lower(),
+        )
+        .first()
+    )
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail="Duplicate application: client already applied for this role at this company",
+        )
+
     db_app = models.Application(**application.model_dump())
     db.add(db_app)
     db.commit()
@@ -25,7 +40,7 @@ def create_application(application: schemas.ApplicationCreate, db: Session = Dep
 def list_applications(
     client_name: Optional[str] = None,
     role_title: Optional[str] = None,
-    status: Optional[str] = None,
+    status: Optional[schemas.ApplicationStatus] = None,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
@@ -36,7 +51,7 @@ def list_applications(
     if role_title:
         query = query.filter(models.Application.role_title.ilike(f"%{role_title}%"))
     if status:
-        query = query.filter(models.Application.status == status)
+        query = query.filter(models.Application.status == status.value)
     return query.offset(skip).limit(limit).all()
 
 @app.get("/applications/stats/summary")
