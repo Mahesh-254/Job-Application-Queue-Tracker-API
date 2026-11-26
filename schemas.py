@@ -10,18 +10,18 @@ class ApplicationStatus(str, Enum):
     OFFER = "Offer"
 
 class ApplicationCreate(BaseModel):
-    client_name: str = Field(..., min_length=1)
-    company_name: str = Field(..., min_length=1)
-    role_title: str = Field(..., min_length=1)
-    status: ApplicationStatus = ApplicationStatus.SUBMITTED
+         client_name: str = Field(..., min_length=1)
+         company_name: str = Field(..., min_length=1)
+         role_title: str = Field(..., min_length=1)
+         status: ApplicationStatus = ApplicationStatus.SUBMITTED
 
-    @field_validator("client_name", "company_name", "role_title")
-    @classmethod
-    def strip_whitespace(cls, v: str) -> str:
-        cleaned = v.strip()
-        if not cleaned:
-            raise ValueError("Field cannot be blank")
-        return cleaned
+         @field_validator("client_name", "company_name", "role_title")
+         @classmethod
+         def strip_whitespace(cls, v: str) -> str:
+             cleaned = v.strip()
+             if not cleaned:
+                 raise ValueError("Field cannot be blank")
+             return cleaned
 
 class ApplicationUpdate(BaseModel):
     client_name: Optional[str] = None
@@ -39,3 +39,20 @@ class ApplicationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserCreate(BaseModel):
+    username: str = Field(..., min_length=3)
+    password: str = Field(..., min_length=6)
+    role: Optional[str] = "applier"
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    role: str
+
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
