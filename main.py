@@ -12,7 +12,7 @@ app = FastAPI(title="Job Application & Queue Tracker API")
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "day": 7, "database": "connected"}
+    return {"status": "ok", "day": 9, "database": "connected"}
 
 @app.post("/register", response_model=schemas.UserResponse, status_code=201)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
